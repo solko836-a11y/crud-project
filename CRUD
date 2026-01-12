@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Management System</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+}
+header{
+  background:#0d6efd;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+header button{
+  background:white;
+  color:#0d6efd;
+  border:none;
+  padding:8px 12px;
+  cursor:pointer;
+}
+
+table{
+  width:90%;
+  margin:20px auto;
+  border-collapse:collapse;
+  background:white;
+}
+th,td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:center;
+}
+button{
+  padding:5px 8px;
+  margin:2px;
+  cursor:pointer;
+}
+
+.box{
+  display:none;
+  background:white;
+  width:300px;
+  margin:20px auto;
+  padding:15px;
+  box-shadow:0 0 10px #aaa;
+}
+.box input{
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+}
+.close{
+  background:#dc3545;
+  color:white;
+}
+.view p{
+  margin:8px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Student Management System</h2>
+  <button onclick="openForm()">Add User</button>
+</header>
+
+<div id="formBox" class="box">
+  <h3 id="formTitle">Add User</h3>
+  <input type="text" id="firstName" placeholder="First Name">
+  <input type="text" id="lastName" placeholder="Last Name">
+  <input type="email" id="email" placeholder="Email">
+  <button onclick="saveUser()">Save</button>
+  <button class="close" onclick="closeForm()">Cancel</button>
+</div>
+
+<div id="viewBox" class="box view">
+  <h3>User Details</h3>
+  <p><b>First Name:</b> <span id="vFirst"></span></p>
+  <p><b>Last Name:</b> <span id="vLast"></span></p>
+  <p><b>Email:</b> <span id="vEmail"></span></p>
+  <button class="close" onclick="closeView()">Close</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Email</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="userTable"></tbody>
+</table>
+
+<script>
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let editIndex = null;
+
+function openForm(){
+  document.getElementById("formBox").style.display="block";
+}
+
+function closeForm(){
+  document.getElementById("formBox").style.display="none";
+  clearForm();
+}
+
+function saveUser(){
+  const firstName = document.getElementById("firstName").value;
+  const lastName  = document.getElementById("lastName").value;
+  const email     = document.getElementById("email").value;
+
+  if(!firstName  !lastName  !email) return;
+
+  const user = { firstName, lastName, email };
+
+  if(editIndex === null){
+    users.push(user);
+  }else{
+    users[editIndex] = user;
+    editIndex = null;
+  }
+
+  localStorage.setItem("users", JSON.stringify(users));
+  closeForm();
+  displayUsers();
+}
+
+function displayUsers(){
+  const table = document.getElementById("userTable");
+  table.innerHTML = "";
+
+  users.forEach((u,i)=>{
+    table.innerHTML += 
+      <tr>
+        <td>${i+1}</td>
+        <td>${u.firstName}</td>
+        <td>${u.lastName}</td>
+        <td>${u.email}</td>
+        <td>
+          <button onclick="viewUser(${i})">View</button>
+          <button onclick="editUser(${i})">Edit</button>
+          <button onclick="deleteUser(${i})">Delete</button>
+        </td>
+      </tr>
+    ;
+  });
+}
+
+function viewUser(index){
+  const u = users[index];
+  document.getElementById("vFirst").innerText = u.firstName;
+  document.getElementById("vLast").innerText  = u.lastName;
+  document.getElementById("vEmail").innerText = u.email;
+  document.getElementById("viewBox").style.display="block";
+}
+
+function closeView(){
+  document.getElementById("viewBox").style.display="none";
+}
+
+function editUser(index){
+  const u = users[index];
+  document.getElementById("firstName").value = u.firstName;
+  document.getElementById("lastName").value  = u.lastName;
+  document.getElementById("email").value     = u.email;
+  editIndex = index;
+  openForm();
+}
+
+function deleteUser(index){
+  users.splice(index,1);
+  localStorage.setItem("users", JSON.stringify(users));
+  displayUsers();
+}
+
+function clearForm(){
+  document.getElementById("firstName").value="";
+  document.getElementById("lastName").value="";
+  document.getElementById("email").value="";
+}
+displayUsers();
+</script>
+
+</body>
+</html>
